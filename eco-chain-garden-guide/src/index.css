@@ -1,0 +1,137 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Eco-Chain Design System — All colors HSL */
+
+@layer base {
+  :root {
+    /* Brand */
+    --primary: 138 53% 6%;            /* #061b0e Forest Green */
+    --primary-container: 138 28% 15%; /* #1b3022 */
+    --on-primary: 0 0% 100%;
+    --primary-muted: 138 12% 52%;     /* #819986 */
+
+    --secondary: 17 55% 38%;          /* #94492c Terracotta */
+    --secondary-container: 16 99% 74%;/* #fe9d7a */
+
+    --tertiary: 75 100% 5%;           /* #121a00 Sage dark */
+    --tertiary-container: 75 100% 9%; /* #243000 */
+    --on-tertiary-container: 75 24% 49%; /* #8a9a5b */
+
+    /* Surfaces */
+    --surface: 42 38% 97%;            /* #fbf9f4 */
+    --surface-container: 45 16% 92%;  /* #f0eee9 */
+    --surface-container-high: 45 13% 90%; /* #eae8e3 */
+
+    --on-surface: 75 4% 10%;          /* #1b1c19 */
+    --on-surface-variant: 120 3% 27%; /* #434843 */
+    --outline: 138 3% 46%;            /* #737973 */
+    --outline-variant: 100 7% 78%;    /* #c3c8c1 */
+
+    /* Mappings for shadcn compat */
+    --background: var(--surface);
+    --foreground: var(--on-surface);
+    --card: 0 0% 100%;
+    --card-foreground: var(--on-surface);
+    --popover: 0 0% 100%;
+    --popover-foreground: var(--on-surface);
+    --primary-foreground: var(--on-primary);
+    --secondary-foreground: 0 0% 100%;
+    --muted: var(--surface-container);
+    --muted-foreground: var(--on-surface-variant);
+    --accent: var(--surface-container);
+    --accent-foreground: var(--on-surface);
+    --destructive: 0 70% 45%;
+    --destructive-foreground: 0 0% 100%;
+    --border: var(--outline-variant);
+    --input: var(--outline-variant);
+    --ring: var(--primary);
+    --radius: 0.5rem;
+
+    /* Shadows — green-tinted */
+    --shadow-soft: 0 4px 16px rgba(6, 27, 14, 0.06);
+    --shadow-card: 0 8px 24px rgba(6, 27, 14, 0.08);
+    --shadow-hover: 0 12px 32px rgba(6, 27, 14, 0.12);
+  }
+
+  * { @apply border-border; }
+  html, body, #root { height: 100%; }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-feature-settings: "ss01", "cv11";
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer components {
+  .shadow-soft { box-shadow: var(--shadow-soft); }
+  .shadow-card { box-shadow: var(--shadow-card); }
+  .shadow-hover { box-shadow: var(--shadow-hover); }
+
+  .text-display { font-size: 48px; font-weight: 700; line-height: 1.2; letter-spacing: -0.02em; }
+  .text-headline-lg { font-size: 32px; font-weight: 600; line-height: 1.3; letter-spacing: -0.01em; }
+  .text-headline-md { font-size: 24px; font-weight: 600; line-height: 1.4; }
+  .text-body-lg { font-size: 18px; font-weight: 400; line-height: 1.6; }
+  .text-body-md { font-size: 16px; font-weight: 400; line-height: 1.6; }
+  .text-label-md { font-size: 14px; font-weight: 600; line-height: 1.2; letter-spacing: 0.01em; }
+  .text-caption { font-size: 12px; font-weight: 500; line-height: 1.2; }
+
+  .page-fade {
+    animation: fadeIn 200ms ease-out;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Custom range slider — Terracotta */
+input[type="range"].eco-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  width: 100%;
+  height: 16px;
+}
+input[type="range"].eco-slider::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 9999px;
+  background: linear-gradient(to right, hsl(var(--secondary)) var(--val, 50%), hsl(var(--outline-variant)) var(--val, 50%));
+}
+input[type="range"].eco-slider::-moz-range-track {
+  height: 4px;
+  border-radius: 9999px;
+  background: hsl(var(--outline-variant));
+}
+input[type="range"].eco-slider::-moz-range-progress {
+  height: 4px;
+  border-radius: 9999px;
+  background: hsl(var(--secondary));
+}
+input[type="range"].eco-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 9999px;
+  background: hsl(var(--secondary));
+  margin-top: -6px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(148, 73, 44, 0.4);
+}
+input[type="range"].eco-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 9999px;
+  background: hsl(var(--secondary));
+  border: none;
+  cursor: pointer;
+}
+
+/* Hide scrollbar utility for plant scroller */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
