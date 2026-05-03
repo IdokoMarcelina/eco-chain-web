@@ -7,6 +7,15 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 5173,
+    proxy: {
+      // Forward every /api request to the Railway backend.
+      // The browser only sees requests to localhost → no CORS issues.
+      "/api": {
+        target: "https://ecochainbackend-production.up.railway.app",
+        changeOrigin: true,  // rewrites the Host header to match the target
+        secure: true,        // validate SSL certificate
+      },
+    },
   },
   plugins: [react()],
   resolve: {

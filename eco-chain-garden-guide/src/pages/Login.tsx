@@ -1,21 +1,24 @@
 import { FormEvent, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { EcoInput } from "@/components/ui/EcoInput";
 import { GoogleButton } from "@/components/ui/GoogleButton";
-import { useAuth } from "@/context/AuthContext";
+import { useLogin } from "@/hooks/useAuth";
 
 const Login = () => {
-  const navigate = useNavigate();
-  const { login } = useAuth();
+  // ── Hook ───────────────────────────────────────────────────────────────────
+  // handleLogin sends credentials, saves token, updates context, navigates.
+  const { handleLogin, isLoading, error } = useLogin();
+
+  // ── Local form state ───────────────────────────────────────────────────────
   const [showPwd, setShowPwd] = useState(false);
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    login(email);
-    navigate("/dashboard");
+    handleLogin(email, password);
   };
 
   return (
@@ -24,13 +27,30 @@ const Login = () => {
         <h2 className="text-headline-md text-on-surface">Welcome back</h2>
         <p className="text-body-md text-on-surface-variant mt-2">Sign in to your account</p>
       </div>
+
+      {/* ── Error banner ── */}
+      {error && (
+        <div className="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+          {error}
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <EcoInput label="Email Address" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
+        <EcoInput
+          label="Email Address"
+          type="email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="you@example.com"
+        />
         <div>
           <EcoInput
             label="Password"
             type={showPwd ? "text" : "password"}
             required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
             trailing={
               <button type="button" onClick={() => setShowPwd((v) => !v)} className="hover:text-on-surface">
@@ -42,8 +62,14 @@ const Login = () => {
             <a href="#" className="text-label-md text-primary hover:underline">Forgot password?</a>
           </div>
         </div>
-        <button type="submit" className="w-full h-[52px] bg-primary text-white rounded-lg text-label-md hover:opacity-90 transition-opacity mt-2">
-          Sign In
+
+        {/* Submit — disabled + label change while loading */}
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="w-full h-[52px] bg-primary text-white rounded-lg text-label-md hover:opacity-90 transition-opacity mt-2 disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          {isLoading ? "Signing in…" : "Sign In"}
         </button>
       </form>
 
@@ -64,3 +90,4 @@ const Login = () => {
 };
 
 export default Login;
+

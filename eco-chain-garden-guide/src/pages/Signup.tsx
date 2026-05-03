@@ -1,22 +1,27 @@
 import { FormEvent, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { EcoInput } from "@/components/ui/EcoInput";
 import { GoogleButton } from "@/components/ui/GoogleButton";
-import { useAuth } from "@/context/AuthContext";
+import { useSignup } from "@/hooks/useAuth";
 
 const Signup = () => {
-  const navigate = useNavigate();
-  const { signup } = useAuth();
+  // ── Hook ───────────────────────────────────────────────────────────────────
+  // handleSignup sends the POST, then navigates to /verify on success.
+  const { handleSignup, isLoading, error } = useSignup();
+
+  // ── Local form state ───────────────────────────────────────────────────────
   const [showPwd, setShowPwd] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [location, setLocation] = useState("");
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    signup(name, email);
-    navigate("/verify", { state: { email } });
+    // Delegate to the hook — it handles the API call + navigation
+    handleSignup({ name, email, password, location });
   };
 
   return (
@@ -25,13 +30,36 @@ const Signup = () => {
         <h2 className="text-headline-md text-on-surface">Create your account</h2>
         <p className="text-body-md text-on-surface-variant mt-2">Join the regenerative living movement.</p>
       </div>
+
+      {/* ── Error banner ── */}
+      {error && (
+        <div className="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+          {error}
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <EcoInput label="Full Name" required value={name} onChange={(e) => setName(e.target.value)} placeholder="Amara Okafor" />
-        <EcoInput label="Email Address" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
+        <EcoInput
+          label="Full Name"
+          required
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Amara Okafor"
+        />
+        <EcoInput
+          label="Email Address"
+          type="email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="you@example.com"
+        />
         <EcoInput
           label="Password"
           type={showPwd ? "text" : "password"}
           required
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
           placeholder="••••••••"
           trailing={
             <button type="button" onClick={() => setShowPwd((v) => !v)} className="hover:text-on-surface">
@@ -39,9 +67,20 @@ const Signup = () => {
             </button>
           }
         />
-        <EcoInput label="Location (optional)" placeholder="e.g. Lagos, Nigeria" />
-        <button type="submit" className="w-full h-[52px] bg-primary text-white rounded-lg text-label-md hover:opacity-90 transition-opacity mt-2">
-          Create Account
+        <EcoInput
+          label="Location (optional)"
+          placeholder="e.g. Lagos, Nigeria"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+        />
+
+        {/* Submit — shows spinner text while loading */}
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="w-full h-[52px] bg-primary text-white rounded-lg text-label-md hover:opacity-90 transition-opacity mt-2 disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          {isLoading ? "Creating account…" : "Create Account"}
         </button>
       </form>
 
@@ -62,3 +101,4 @@ const Signup = () => {
 };
 
 export default Signup;
+

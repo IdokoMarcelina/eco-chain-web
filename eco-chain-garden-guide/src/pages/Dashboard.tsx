@@ -3,6 +3,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { useAuth } from "@/context/AuthContext";
 import { myPlants, careTasks } from "@/data/mockData";
 import { Link } from "react-router-dom";
+import { useDashboard } from "@/hooks/useDashboard";
 
 const StatCard = ({
   icon: Icon, label, value, iconBg, iconColor,
@@ -37,8 +38,24 @@ const Dashboard = () => {
   const { user } = useAuth();
   const today = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
 
+  // ── Real backend data ──────────────────────────────────────────────────────
+  // dashboardData contains the raw API response (extend UI when backend fields are confirmed).
+  const { dashboardData, isLoading: isDashboardLoading, error: dashboardError } = useDashboard();
+
   return (
     <AppLayout>
+      {/* ── Dashboard loading / error feedback ── */}
+      {isDashboardLoading && (
+        <div className="mb-4 px-4 py-2 rounded-lg bg-surface-container text-on-surface-variant text-sm">
+          Loading your dashboard data…
+        </div>
+      )}
+      {dashboardError && (
+        <div className="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+          {dashboardError}
+        </div>
+      )}
+
       <header className="mb-8">
         <h1 className="text-headline-lg text-on-surface">Good morning, {user?.name}</h1>
         <p className="text-body-md text-on-surface-variant mt-1">{today}</p>

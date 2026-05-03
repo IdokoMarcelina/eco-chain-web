@@ -1,23 +1,32 @@
 import { useEffect, useRef, useState, KeyboardEvent, ClipboardEvent } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Mail, ArrowLeft } from "lucide-react";
 import { AuthLayout } from "@/components/layout/AuthLayout";
+import { useVerifyOtp, useResendOtp } from "@/hooks/useAuth";
 
 const Verify = () => {
-  const navigate = useNavigate();
   const { state } = useLocation() as { state?: { email?: string } };
   const email = state?.email || "your@email.com";
 
+  // ── OTP digit state ────────────────────────────────────────────────────────
   const [digits, setDigits] = useState<string[]>(Array(6).fill(""));
   const [countdown, setCountdown] = useState(60);
   const refs = useRef<(HTMLInputElement | null)[]>([]);
 
+  // ── Hooks ──────────────────────────────────────────────────────────────────
+  // handleVerify sends email + joined OTP to the backend
+  const { handleVerify, isLoading: isVerifying, error: verifyError } = useVerifyOtp();
+  // handleResend triggers the resend-OTP endpoint
+  const { handleResend, isLoading: isResending, error: resendError, success: resendSuccess } = useResendOtp();
+
+  // ── Countdown timer ────────────────────────────────────────────────────────
   useEffect(() => {
     if (countdown <= 0) return;
     const t = setTimeout(() => setCountdown((c) => c - 1), 1000);
     return () => clearTimeout(t);
   }, [countdown]);
 
+  // ── Digit helpers ──────────────────────────────────────────────────────────
   const setDigit = (i: number, val: string) => {
     const v = val.replace(/\D/g, "").slice(-1);
     setDigits((arr) => {
@@ -43,7 +52,21 @@ const Verify = () => {
     refs.current[Math.min(text.length, 5)]?.focus();
   };
 
-  const verify = () => navigate("/dashboard");
+  // ── Verify handler ─────────────────────────────────────────────────────────
+  const verify = () => {
+    const otp = digits.join("");
+    if (otp.length < 6) return; // don't fire if OTP is incomplete
+    // The hook navigates to /login on success
+    handleVerify(email, otp);
+  };
+
+  // ── Resend handler ─────────────────────────────────────────────────────────
+  const resend = async () => {
+    await handleResend(email);
+    // Only reset the countdown if the API call succeeded
+    setCountdown(60);
+  };
+
   const mm = Math.floor(countdown / 60);
   const ss = String(countdown % 60).padStart(2, "0");
 
@@ -59,6 +82,24 @@ const Verify = () => {
         </p>
       </div>
 
+      {/* ── Error / success banners ── */}
+      {verifyError && (
+        <div className="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+          {verifyError}
+        </div>
+      )}
+      {resendError && (
+        <div className="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+          {resendError}
+        </div>
+      )}
+      {resendSuccess && (
+        <div className="mb-4 px-4 py-3 rounded-lg bg-green-50 border border-green-200 text-green-700 text-sm">
+          A new code has been sent to {email}.
+        </div>
+      )}
+
+      {/* ── OTP input boxes ── */}
       <div className="flex justify-between gap-2 mb-6">
         {digits.map((d, i) => (
           <input
@@ -75,17 +116,27 @@ const Verify = () => {
         ))}
       </div>
 
-      <button onClick={verify} className="w-full h-[52px] bg-primary text-white rounded-lg text-label-md hover:opacity-90 transition-opacity">
-        Verify Email
+      {/* ── Verify button ── */}
+      <button
+        onClick={verify}
+        disabled={isVerifying || digits.join("").length < 6}
+        className="w-full h-[52px] bg-primary text-white rounded-lg text-label-md hover:opacity-90 transition-opacity disabled:opacity-60 disabled:cursor-not-allowed"
+      >
+        {isVerifying ? "Verifying…" : "Verify Email"}
       </button>
 
+      {/* ── Resend section ── */}
       <p className="text-center text-body-md text-on-surface-variant mt-5">
         Didn't receive it?{" "}
         {countdown > 0 ? (
           <span className="text-on-surface-variant">Resend in {mm}:{ss}</span>
         ) : (
-          <button onClick={() => setCountdown(60)} className="text-primary font-semibold hover:underline">
-            Resend code
+          <button
+            onClick={resend}
+            disabled={isResending}
+            className="text-primary font-semibold hover:underline disabled:opacity-60"
+          >
+            {isResending ? "Sending…" : "Resend code"}
           </button>
         )}
       </p>
@@ -98,3 +149,4 @@ const Verify = () => {
 };
 
 export default Verify;
+
