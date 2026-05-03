@@ -10,6 +10,8 @@ import Verify from "./pages/Verify";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import GreenMatch from "./pages/GreenMatch";
+import ProfilePage from "./pages/Profile";
+import SettingsPage from "./pages/Settings";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -28,6 +30,8 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/green-match" element={<GreenMatch />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/settings" element={<SettingsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
