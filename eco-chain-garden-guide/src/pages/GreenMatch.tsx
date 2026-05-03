@@ -4,7 +4,9 @@ import {
   Droplets, ChevronDown, Leaf, Flower2, Sparkles,
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { plantMatches, type PlantMatch } from "@/data/mockData";
+import { type PlantMatch } from "@/data/mockData";
+import { useGreenMatch } from "@/hooks/useGreenMatch";
+import { Plant, SunExposure, SoilCondition, WaterConservation } from "@/services/greenMatchApi";
 
 type SunMode = "full" | "partial";
 
@@ -110,16 +112,84 @@ const PendingCard = () => (
   </div>
 );
 
+// ── Adapter: API Plant → PlantMatch (shape expected by PlantCard) ─────────────
+// The backend returns a Plant object whose fields don't perfectly match
+// the PlantMatch type the existing PlantCard renders. This function
+// bridges the gap so we never have to change the UI component.
+function toPlantMatch(p: Plant): PlantMatch {
+  return {
+    id: p.id,
+    name: p.name,
+    scientific: p.scientific_name,
+    match: 90, // backend doesn't return a % score; use a default
+    badge: {
+      label: p.impact_label || "Native",
+      tone: "green",
+    },
+    image: p.image_url,
+    // tags comes as a comma-separated string from the backend
+    tags: p.tags
+      ? p.tags.split(",").map((t) => t.trim().toUpperCase())
+      : [],
+    care: {
+      water: p.water_frequency || p.water_conservation,
+      sun: p.sun_exposure,
+    },
+  };
+}
+
+// ── Value mappers (UI state → API enums) ──────────────────────────────────────
+
+/** Maps the two-toggle UI sun state to the backend's three-value enum */
+function mapSun(sunMode: SunMode): SunExposure {
+  return sunMode === "full" ? "full_sun" : "partial_shade";
+}
+
+/** Maps the soil dropdown label to the backend's accepted values */
+function mapSoil(soilLabel: string): SoilCondition {
+  const lower = soilLabel.toLowerCase();
+  if (lower.includes("sandy")) return "sandy";
+  if (lower.includes("clay") || lower.includes("lateritic")) return "clay";
+  return "loamy"; // default for loamy / peat / unrecognised
+}
+
+/** Maps the 0-100 slider to "low" | "moderate" | "high" */
+function mapWater(value: number): WaterConservation {
+  if (value >= 66) return "high";
+  if (value >= 33) return "moderate";
+  return "low";
+}
+
 const GreenMatch = () => {
+  // ── Hook ─────────────────────────────────────────────────────────────────
+  const { results, isLoading, error, runMatch } = useGreenMatch();
+
+  // ── Local form state ──────────────────────────────────────────────────────
+  const [location, setLocation] = useState("");
   const [sun, setSun] = useState<SunMode>("partial");
   const [soil, setSoil] = useState("Lateritic (Red Clay)");
-  const [water, setWater] = useState(75); // 0=Moderate, 100=Ultra Low
-  const [loading, setLoading] = useState(false);
+  const [water, setWater] = useState(75); // 0 = Moderate, 100 = Ultra Low
 
-  const runMatch = () => {
-    setLoading(true);
-    setTimeout(() => setLoading(false), 1500);
+  // ── Derived: map UI values → API enum values ──────────────────────────────
+  const handleRunMatch = () => {
+    runMatch({
+      location: location || "Unknown",
+      sun_exposure: mapSun(sun),
+      soil_condition: mapSoil(soil),
+      water_conservation: mapWater(water),
+    });
   };
+
+  // Convert API results to the shape PlantCard expects.
+  // Guard with Array.isArray so a non-array response never crashes the page.
+  const displayPlants: PlantMatch[] = Array.isArray(results)
+    ? results.map(toPlantMatch)
+    : [];
+
+  // Dynamic label shown on the slider
+  const waterLabel =
+    water >= 66 ? "High" : water >= 33 ? "Moderate" : "Low";
+
 
   return (
     <AppLayout>
@@ -147,6 +217,8 @@ const GreenMatch = () => {
                 <input
                   className="w-full h-11 pl-10 pr-3 bg-surface-container border border-outline-variant rounded-lg text-body-md focus:outline-none focus:border-primary"
                   placeholder="e.g. Nairobi, Kenya"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
                 />
               </div>
             </div>
@@ -181,7 +253,8 @@ const GreenMatch = () => {
             <div className="mb-6">
               <div className="flex items-baseline justify-between mb-2">
                 <span className="text-label-md text-on-surface">Water<br />Conservation</span>
-                <span className="text-label-md text-secondary text-right">Xeriscape<br />Priority</span>
+                {/* Dynamic label updates as slider moves */}
+                <span className="text-label-md text-secondary font-semibold">{waterLabel}</span>
               </div>
               <input
                 type="range"
@@ -193,16 +266,18 @@ const GreenMatch = () => {
                 style={{ ["--val" as any]: `${water}%` }}
               />
               <div className="flex justify-between text-caption text-on-surface-variant uppercase tracking-wider mt-2">
+                <span>Low</span>
                 <span>Moderate</span>
-                <span>Ultra Low</span>
+                <span>High</span>
               </div>
             </div>
 
             <button
-              onClick={runMatch}
-              className="w-full h-[52px] bg-primary text-white rounded-lg text-label-md inline-flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
+              onClick={handleRunMatch}
+              disabled={isLoading}
+              className="w-full h-[52px] bg-primary text-white rounded-lg text-label-md inline-flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              <Search size={16} /> Match My Garden
+              <Search size={16} /> {isLoading ? "Matching…" : "Match My Garden"}
             </button>
           </div>
 
@@ -232,11 +307,26 @@ const GreenMatch = () => {
             </div>
           </div>
 
+          {/* Error banner */}
+          {error && (
+            <div className="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+              {error}
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {plantMatches.map((p) => (
-              <PlantCard key={p.id} plant={p} loading={loading} />
+            {/* Show skeleton cards while loading */}
+            {isLoading && ["", "", ""].map((_, i) => (
+              <PlantCard key={i} plant={{} as PlantMatch} loading={true} />
             ))}
-            <PendingCard />
+
+            {/* Real results from the backend */}
+            {!isLoading && displayPlants.map((p) => (
+              <PlantCard key={p.id} plant={p} loading={false} />
+            ))}
+
+            {/* Pending card — shown when there are results or before first search */}
+            {!isLoading && <PendingCard />}
           </div>
         </div>
       </div>
