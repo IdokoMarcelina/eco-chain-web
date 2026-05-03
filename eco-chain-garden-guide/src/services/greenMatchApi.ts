@@ -19,7 +19,7 @@ export type SunExposure = "full_sun" | "partial_shade" | "shade";
 export type SoilCondition = "loamy" | "sandy" | "clay";
 
 /** Exact values the backend accepts for water conservation */
-export type WaterConservation = "low" | "moderate" | "high";
+export type WaterConservation = "moderate" | "low" | "ultra_low";
 
 /** Payload sent to POST /api/v1/green-match/ */
 export interface GreenMatchPayload {

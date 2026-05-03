@@ -127,8 +127,10 @@ function toPlantMatch(p: Plant): PlantMatch {
       tone: "green",
     },
     image: p.image_url,
-    // tags comes as a comma-separated string from the backend
-    tags: p.tags
+    // tags may be a pre-split array OR a comma-separated string — handle both
+    tags: Array.isArray(p.tags)
+      ? (p.tags as string[]).map((t) => t.trim().toUpperCase())
+      : typeof p.tags === "string" && p.tags
       ? p.tags.split(",").map((t) => t.trim().toUpperCase())
       : [],
     care: {
@@ -153,11 +155,11 @@ function mapSoil(soilLabel: string): SoilCondition {
   return "loamy"; // default for loamy / peat / unrecognised
 }
 
-/** Maps the 0-100 slider to "low" | "moderate" | "high" */
+/** Maps the 0-100 slider to "moderate" | "low" | "ultra_low" */
 function mapWater(value: number): WaterConservation {
-  if (value >= 66) return "high";
-  if (value >= 33) return "moderate";
-  return "low";
+  if (value >= 66) return "ultra_low";
+  if (value >= 33) return "low";
+  return "moderate";
 }
 
 const GreenMatch = () => {
@@ -188,7 +190,7 @@ const GreenMatch = () => {
 
   // Dynamic label shown on the slider
   const waterLabel =
-    water >= 66 ? "High" : water >= 33 ? "Moderate" : "Low";
+    water >= 66 ? "Ultra Low" : water >= 33 ? "Low" : "Moderate";
 
 
   return (
@@ -266,9 +268,9 @@ const GreenMatch = () => {
                 style={{ ["--val" as any]: `${water}%` }}
               />
               <div className="flex justify-between text-caption text-on-surface-variant uppercase tracking-wider mt-2">
-                <span>Low</span>
                 <span>Moderate</span>
-                <span>High</span>
+                <span>Low</span>
+                <span>Ultra Low</span>
               </div>
             </div>
 
