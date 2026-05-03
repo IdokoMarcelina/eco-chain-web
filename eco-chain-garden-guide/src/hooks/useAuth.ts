@@ -19,6 +19,7 @@ import {
   apiVerifyOtp,
   apiResendOtp,
   saveToken,
+  saveRefreshToken,
   SignupPayload,
 } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
@@ -158,12 +159,13 @@ export function useLogin() {
     try {
       const data = await apiLogin({ email, password });
 
-      // Persist token so authenticated requests (dashboard) can use it
-      saveToken(data.token);
+      // Save both tokens from the real backend response shape:
+      // { access: "...", refresh: "...", user: { id, name, email, ... } }
+      saveToken(data.access);
+      saveRefreshToken(data.refresh);
 
-      // Update AuthContext with the returned user info (or derive from email)
-      const name = data.user?.name ?? email.split("@")[0];
-      login(name, email);
+      // Update AuthContext with the real user name from the backend
+      login(data.user.name, data.user.email);
 
       setSuccess(true);
       navigate("/dashboard");

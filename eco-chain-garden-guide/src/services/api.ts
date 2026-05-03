@@ -11,18 +11,25 @@ const BASE_URL = "https://ecochainbackend-production.up.railway.app";
 
 // ── Token helpers (localStorage) ─────────────────────────────────────────────
 const TOKEN_KEY = "eco_auth_token";
+const REFRESH_KEY = "eco_refresh_token";
 
-/** Save the JWT returned by the login endpoint. */
+/** Save the JWT access token returned by the login endpoint. */
 export const saveToken = (token: string) =>
   localStorage.setItem(TOKEN_KEY, token);
 
-/** Read the saved JWT (null if not logged in). */
+/** Save the JWT refresh token for later token renewal. */
+export const saveRefreshToken = (token: string) =>
+  localStorage.setItem(REFRESH_KEY, token);
+
+/** Read the saved access token (null if not logged in). */
 export const getToken = (): string | null =>
   localStorage.getItem(TOKEN_KEY);
 
-/** Remove the JWT (used on logout). */
-export const removeToken = () =>
+/** Remove both tokens (used on logout). */
+export const removeToken = () => {
   localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(REFRESH_KEY);
+};
 
 // ── Internal fetch wrapper ────────────────────────────────────────────────────
 /**
@@ -62,6 +69,15 @@ async function request<T>(
   }
 
   if (!response.ok) {
+    // On 401: the stored token is invalid/expired — wipe it and signal the app
+    if (response.status === 401) {
+      localStorage.removeItem("eco_auth_token");
+      localStorage.removeItem("eco_refresh_token");
+      localStorage.removeItem("eco_user");
+      // Dispatch a custom event so any part of the app can redirect to /login
+      window.dispatchEvent(new Event("eco:unauthorized"));
+    }
+
     // Prefer a message field from the API, fall back to HTTP status text
     const message =
       data?.message ||
@@ -99,9 +115,15 @@ export interface ResendOtpPayload {
 
 export interface LoginResponse {
   token: string;
-  user?: {
+  access: string;          // JWT access token
+  refresh: string;         // JWT refresh token
+  user: {
+    id: string;
     name: string;
     email: string;
+    location: string;
+    status: string;
+    created_at: string;
   };
 }
 

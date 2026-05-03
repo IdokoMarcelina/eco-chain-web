@@ -57,7 +57,7 @@ const Dashboard = () => {
       )}
 
       <header className="mb-8">
-        <h1 className="text-headline-lg text-on-surface">Good morning, {user?.name}</h1>
+        <h1 className="text-headline-lg text-on-surface">Welcome, {user?.name}</h1>
         <p className="text-body-md text-on-surface-variant mt-1">{today}</p>
       </header>
 
