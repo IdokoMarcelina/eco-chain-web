@@ -56,13 +56,13 @@ const Dashboard = () => {
         </div>
       )}
 
-      <header className="mb-8">
-        <h1 className="text-headline-lg text-on-surface">Welcome, {user?.name}</h1>
+      <header className="mb-6 lg:mb-8">
+        <h1 className="text-2xl sm:text-[32px] font-semibold text-on-surface leading-tight">Welcome, {user?.name}</h1>
         <p className="text-body-md text-on-surface-variant mt-1">{today}</p>
       </header>
 
-      {/* Stats */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+      {/* Stats — 1 col on mobile, 3 on md+ */}
+      <section className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-8 lg:mb-10">
         <StatCard icon={Droplets} label="Water Saved" value="420 L" iconBg="hsl(17 55% 38% / 0.12)" iconColor="hsl(17 55% 38%)" />
         <StatCard icon={Leaf} label="CO₂ Offset" value="12.5 kg" iconBg="hsl(138 53% 6% / 0.1)" iconColor="hsl(138 53% 6%)" />
         <StatCard icon={Star} label="Biodiversity Score" value="78/100" iconBg="hsl(75 24% 49% / 0.18)" iconColor="hsl(75 24% 49%)" />

@@ -195,17 +195,17 @@ const GreenMatch = () => {
 
   return (
     <AppLayout>
-      <header className="mb-8">
-        <h1 className="text-headline-lg text-primary">Green Match</h1>
+      <header className="mb-6 lg:mb-8">
+        <h1 className="text-2xl sm:text-[32px] font-semibold text-primary leading-tight">Green Match</h1>
         <p className="text-body-md text-on-surface-variant mt-2 max-w-[560px]">
           Discover native African flora perfectly adapted to your sustainable Eco-Chain residence. Input your environmental factors to begin.
         </p>
       </header>
 
       <div className="flex flex-col lg:flex-row gap-6">
-        {/* LEFT */}
-        <div className="lg:w-[300px] shrink-0 space-y-4">
-          <div className="bg-card rounded-card shadow-soft p-6">
+        {/* LEFT — full width on mobile, fixed 300px on lg+ */}
+        <div className="w-full lg:w-[300px] shrink-0 space-y-4">
+          <div className="bg-card rounded-card shadow-soft p-4 sm:p-6">
             <div className="flex items-center gap-2 mb-5">
               <SlidersHorizontal size={20} className="text-primary" />
               <h2 className="text-headline-md text-on-surface">Environmental Factors</h2>
