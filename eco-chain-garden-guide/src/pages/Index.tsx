@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import {
   Leaf, Droplets, Star, ArrowRight, Sprout, Globe, ShieldCheck,
-  TreePine, Sun, Wind,
+  TreePine, Sun, Wind, Calculator, Users, BookOpen, Wrench,
 } from "lucide-react";
 
 // ── Reusable components ───────────────────────────────────────────────────────
@@ -154,16 +154,17 @@ const LandingPage = () => (
       </div>
 
       <div className="relative max-w-3xl mx-auto text-center">
-        <Badge><Sprout size={10} /> Regenerative Living Platform</Badge>
+        <Badge><Sprout size={10} /> Sustainable Housing Platform</Badge>
 
         <h1 className="mt-6 text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-[1.15] tracking-tight">
-          Grow a garden that<br className="hidden sm:block" />{" "}
-          <span style={{ color: "#8a9a5b" }}>heals the planet</span>
+          Build a home that's<br className="hidden sm:block" />{" "}
+          <span style={{ color: "#8a9a5b" }}>good for Africa</span>
         </h1>
 
         <p className="mt-6 text-base sm:text-lg text-white/70 max-w-xl mx-auto leading-relaxed">
-          Eco-Chain matches you with native African plants perfectly adapted to your environment —
-          saving water, restoring biodiversity, and building a sustainable future from your backyard.
+          Eco-Chain helps homeowners, developers, and construction professionals plan, design,
+          and maintain sustainable homes — making eco-friendly housing accessible, affordable,
+          and practical across Africa.
         </p>
 
         <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -178,7 +179,7 @@ const LandingPage = () => (
 
         {/* Social proof */}
         <p className="mt-8 text-white/40 text-xs font-medium tracking-wide">
-          Join thousands of eco-gardeners across Africa
+          Trusted by homeowners, developers, and builders across Africa
         </p>
       </div>
     </section>
@@ -186,10 +187,10 @@ const LandingPage = () => (
     {/* ══ STATS BAR ═══════════════════════════════════════════════════════════ */}
     <section className="bg-primary/95 border-t border-white/10 py-8 px-4 sm:px-6" id="impact">
       <div className="max-w-4xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8">
-        <StatPill value="80%" label="Less water used" />
-        <StatPill value="500+" label="Native plant species" />
-        <StatPill value="12k+" label="Active gardeners" />
-        <StatPill value="4.2t" label="CO₂ offset per year" />
+        <StatPill value="500+" label="Verified professionals" />
+        <StatPill value="6" label="Powerful tools" />
+        <StatPill value="12k+" label="Active users" />
+        <StatPill value="40%" label="Average cost savings" />
       </div>
     </section>
 
@@ -199,49 +200,49 @@ const LandingPage = () => (
         <div className="text-center mb-14">
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#94492c] mb-3">What we offer</p>
           <h2 className="text-3xl sm:text-4xl font-bold text-[#061b0e] leading-tight">
-            Everything your eco-garden needs
+            Everything you need to build sustainably
           </h2>
           <p className="mt-4 text-[#434843] max-w-xl mx-auto leading-relaxed">
-            From AI-powered plant matching to care schedules and biodiversity tracking —
-            all in one beautiful, easy-to-use platform.
+            From AI-powered design assistance to cost comparisons, professional connections,
+            and long-term maintenance support — all in one platform.
           </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           <FeatureCard
             icon={Leaf}
-            title="Green Match AI"
-            description="Tell us your location, sun exposure, and soil type. We'll recommend the perfect native plants for your exact conditions."
+            title="Design Assistant"
+            description="Browse eco-friendly house templates and get personalised recommendations based on your budget, location, and size requirements."
             color="#061b0e"
           />
           <FeatureCard
-            icon={Droplets}
-            title="Water Intelligence"
-            description="Xeriscape-first recommendations mean your garden uses up to 80% less water than conventional landscaping."
+            icon={Calculator}
+            title="Cost Estimator"
+            description="Compare traditional vs eco-friendly building costs side by side. See long-term savings so you can make confident, informed decisions."
             color="#94492c"
           />
           <FeatureCard
-            icon={Star}
-            title="Biodiversity Score"
-            description="Track how your garden contributes to local pollinators, birds, and insects with a real-time biodiversity impact score."
+            icon={Users}
+            title="Professional Network"
+            description="Connect with verified architects, engineers, and builders. Browse profiles, read reviews, and book the right expert for your project."
             color="#8a9a5b"
           />
           <FeatureCard
-            icon={Globe}
-            title="Climate-Adaptive"
-            description="Plants chosen for your specific climate zone so they thrive even as weather patterns shift over time."
+            icon={BookOpen}
+            title="Education Hub"
+            description="Learn at your own pace with short videos and written guides on sustainable housing — simple, practical, and easy to understand."
             color="#1b3022"
           />
           <FeatureCard
-            icon={ShieldCheck}
-            title="Care Reminders"
-            description="Never miss a watering, pruning, or feeding day. Get personalised care schedules for every plant in your garden."
+            icon={Sprout}
+            title="Green Match"
+            description="Get plant recommendations suited to your home environment. Input your location, sunlight, and space — and we'll do the rest."
             color="#94492c"
           />
           <FeatureCard
-            icon={TreePine}
-            title="Carbon Tracking"
-            description="See the real CO₂ offset your garden generates and export annual impact reports for ESG or personal records."
+            icon={Wrench}
+            title="Maintenance Support"
+            description="Keep your eco-home in top shape with maintenance reminders, checklists, and easy access to support professionals when you need them."
             color="#061b0e"
           />
         </div>
@@ -255,13 +256,13 @@ const LandingPage = () => (
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#94492c] mb-3">Simple process</p>
           <h2 className="text-3xl sm:text-4xl font-bold text-[#061b0e] leading-tight mb-10">
-            Your garden journey<br />in 4 steps
+            Your sustainable home<br />journey in 4 steps
           </h2>
           <div className="space-y-8">
-            <StepCard number="1" title="Create your account" description="Sign up in seconds — no credit card needed. Tell us a little about where you live." />
-            <StepCard number="2" title="Set your conditions" description="Enter your plot location, sun hours, soil type, and water goals." />
-            <StepCard number="3" title="Get matched" description="Our Green Match engine surfaces native plants perfectly suited to your environment." />
-            <StepCard number="4" title="Grow & track impact" description="Add plants to your garden, follow care schedules, and watch your biodiversity score rise." />
+            <StepCard number="1" title="Create your account" description="Sign up in seconds — no credit card needed. Tell us your goals: build, learn, or maintain." />
+            <StepCard number="2" title="Set your preferences" description="Enter your budget, location, house size, and sustainability goals to personalise your experience." />
+            <StepCard number="3" title="Explore your tools" description="Use the Design Assistant, Cost Estimator, and Professional Network to plan with confidence." />
+            <StepCard number="4" title="Build and maintain" description="Execute your plan with expert support, educational resources, and ongoing maintenance guidance." />
           </div>
         </div>
 
@@ -282,8 +283,8 @@ const LandingPage = () => (
               <div className="w-20 h-20 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-6 backdrop-blur">
                 <Leaf size={36} className="text-white" />
               </div>
-              <p className="text-white text-xl font-bold leading-tight">Your sustainable<br />garden starts here</p>
-              <p className="text-white/50 text-sm mt-3">Powered by native plant science</p>
+              <p className="text-white text-xl font-bold leading-tight">Your sustainable<br />home starts here</p>
+              <p className="text-white/50 text-sm mt-3">Smart tools. Trusted experts. Real savings.</p>
               <div className="flex justify-center gap-3 mt-8">
                 {[Sun, Droplets, Wind].map((Icon, i) => (
                   <div key={i} className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center backdrop-blur">
@@ -306,10 +307,11 @@ const LandingPage = () => (
       <div className="relative max-w-2xl mx-auto">
         <Badge><Sprout size={10} /> Free to get started</Badge>
         <h2 className="mt-6 text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight">
-          Ready to grow something<br className="hidden sm:block" /> that matters?
+          Ready to build something<br className="hidden sm:block" /> that lasts?
         </h2>
         <p className="mt-5 text-white/60 text-base max-w-lg mx-auto leading-relaxed">
-          Join thousands of regenerative gardeners across Africa. Your first plant match is on us.
+          Join thousands of homeowners and developers across Africa building smarter,
+          greener homes. Your first design plan is on us.
         </p>
         <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
           <StartNowBtn size="lg" />
@@ -333,7 +335,7 @@ const LandingPage = () => (
           <span className="font-bold text-white">Eco<span style={{ color: "#8a9a5b" }}>-Chain</span></span>
         </Link>
         <p className="text-white/30 text-xs text-center">
-          © {new Date().getFullYear()} Eco-Chain · Regenerative Living · All rights reserved
+          © {new Date().getFullYear()} Eco-Chain · Sustainable Housing · All rights reserved
         </p>
         <div className="flex gap-5 text-white/40 text-xs font-medium">
           <a href="#" className="hover:text-white/70 transition-colors">Privacy</a>
