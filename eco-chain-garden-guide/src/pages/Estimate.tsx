@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
   Wallet,
   TrendingUp,
@@ -11,107 +11,155 @@ import {
   Building2,
   Zap,
   Globe,
-  Hammer,
+  PiggyBank,
+  BarChart3,
+  Lightbulb,
+  Target,
+  ChevronRight,
 } from "lucide-react"
 import { AppLayout } from "@/components/layout/AppLayout"
+import { toast } from "sonner"
 import {
-  apiEstimateCost,
-  apiTcoProjection,
-  apiGetMaterials,
+  apiEstimateForm,
+  apiSaveEstimate,
   apiDownloadReport,
 } from "@/services/costApi"
 
-const CostCard = ({
-  title,
-  amount,
-  icon: Icon,
-  subtitle,
-  color,
-}: any) => (
-  <div className="bg-card rounded-[24px] shadow-soft p-6">
-    <div
-      className="w-14 h-14 rounded-full flex items-center justify-center"
-      style={{ background: `${color}20` }}
-    >
-      <Icon color={color} />
+const StatCard = ({ title, amount, icon: Icon, color, subtitle }: any) => (
+  <div className="bg-card rounded-[24px] shadow-soft p-6 flex flex-col">
+    <div className="flex items-center justify-between mb-4">
+      <div
+        className="w-12 h-12 rounded-full flex items-center justify-center"
+        style={{ background: `${color}20` }}
+      >
+        <Icon color={color} size={22} />
+      </div>
+      {subtitle && (
+        <span className="text-xs text-on-surface-variant">{subtitle}</span>
+      )}
     </div>
-    <div className="mt-5">
-      <div className="text-sm text-on-surface-variant">{title}</div>
-      <h2 className="text-[34px] font-bold mt-2 text-primary">{amount}</h2>
-      <p className="text-sm mt-2 text-on-surface-variant">{subtitle}</p>
+    <div className="text-sm text-on-surface-variant">{title}</div>
+    <div className="text-[28px] font-bold mt-1" style={{ color }}>
+      {amount}
     </div>
   </div>
 )
 
+const BreakdownBar = ({ label, value, max, color, currency }: any) => (
+  <div className="space-y-1.5">
+    <div className="flex justify-between text-sm">
+      <span className="text-on-surface-variant">{label}</span>
+      <span className="font-medium" style={{ color }}>{currency}{value?.toLocaleString()}</span>
+    </div>
+    <div className="h-2.5 bg-surface-container rounded-full overflow-hidden">
+      <div
+        className="h-full rounded-full transition-all duration-700"
+        style={{ width: `${(value / max) * 100}%`, background: color }}
+      />
+    </div>
+  </div>
+)
+
+const UpgradeCard = ({ items, icon: Icon, color, title }: any) => (
+  <div className="bg-card rounded-[24px] shadow-soft p-6">
+    <div className="flex items-center gap-3 mb-5">
+      <div
+        className="w-10 h-10 rounded-full flex items-center justify-center"
+        style={{ background: `${color}20` }}
+      >
+        <Icon color={color} size={18} />
+      </div>
+      <h3 className="font-semibold">{title}</h3>
+    </div>
+    <ul className="space-y-3">
+      {items?.map((item: string, i: number) => (
+        <li key={i} className="flex items-start gap-3 text-sm text-on-surface-variant">
+          <ChevronRight size={14} className="mt-0.5 shrink-0" style={{ color }} />
+          <span>{item}</span>
+        </li>
+      ))}
+    </ul>
+  </div>
+)
+
 const powerOptions = [
-  { value: "solar", label: "Solar" },
-  { value: "generator", label: "Generator" },
-  { value: "grid", label: "Grid" },
-  { value: "hybrid", label: "Hybrid (Solar + Grid)" },
-  { value: "off-grid", label: "Off-Grid Complete" },
+  { value: "Solar", label: "Solar" },
+  { value: "Generator", label: "Generator" },
+  { value: "Grid", label: "Grid" },
+  { value: "Hybrid", label: "Hybrid (Solar + Grid)" },
+  { value: "Off-Grid", label: "Off-Grid Complete" },
 ]
 
 const buildingTypes = [
-  { value: "bungalow", label: "Bungalow" },
-  { value: "duplex", label: "Duplex" },
-  { value: "mansion", label: "Mansion" },
-  { value: "apartment", label: "Apartment" },
-  { value: "commercial", label: "Commercial" },
+  { value: "Bungalow", label: "Bungalow" },
+  { value: "Duplex", label: "Duplex" },
+  { value: "Mansion", label: "Mansion" },
+  { value: "Apartment", label: "Apartment" },
+  { value: "Commercial", label: "Commercial" },
 ]
 
 const ecoLevels = [
-  { value: "low", label: "Low" },
-  { value: "medium", label: "Medium" },
-  { value: "high", label: "High" },
+  { value: "Low", label: "Low" },
+  { value: "Medium", label: "Medium" },
+  { value: "High", label: "High" },
 ]
 
 const countries = [
-  { value: "NG", label: "Nigeria" },
-  { value: "GH", label: "Ghana" },
-  { value: "KE", label: "Kenya" },
-  { value: "ZA", label: "South Africa" },
-  { value: "TZ", label: "Tanzania" },
+  { value: "Nigeria", label: "Nigeria" },
+  { value: "Ghana", label: "Ghana" },
+  { value: "Kenya", label: "Kenya" },
+  { value: "South Africa", label: "South Africa" },
+  { value: "Tanzania", label: "Tanzania" },
 ]
 
 const Estimate = () => {
-  const [country, setCountry] = useState("NG")
+  const [country, setCountry] = useState("Nigeria")
   const [city, setCity] = useState("Lagos")
-  const [buildingType, setBuildingType] = useState("duplex")
+  const [houseType, setHouseType] = useState("Duplex")
   const [rooms, setRooms] = useState("4")
-  const [sizeSqm, setSizeSqm] = useState("120")
-  const [ecoLevel, setEcoLevel] = useState("high")
+  const [size, setSize] = useState("120")
+  const [ecoLevel, setEcoLevel] = useState("High")
   const [budget, setBudget] = useState("")
-  const [power, setPower] = useState("hybrid")
+  const [powerPreference, setPowerPreference] = useState("Hybrid")
 
-  const [estimate, setEstimate] = useState<any>()
-  const [projection, setProjection] = useState<any>()
-  const [materials, setMaterials] = useState<any[]>([])
+  const [result, setResult] = useState<any>()
   const [loading, setLoading] = useState(false)
 
-  const getPayload = () => ({
-    country,
-    city,
-    building_type: buildingType,
-    rooms: Number(rooms),
-    size_sqm: Number(sizeSqm),
-    eco_level: ecoLevel,
-    budget: budget ? Number(budget) : undefined,
-    power,
-  })
+  useEffect(() => {
+    const style = document.createElement("style")
+    style.id = "eco-print-styles"
+    style.textContent = `
+      @media print {
+        nav, header, .sidebar, .lg\\:ml-\\[220px\\] > div > div:first-child,
+        button, .sticky { display: none !important; }
+        body { background: #fff !important; }
+        .lg\\:ml-\\[220px\\] { margin-left: 0 !important; }
+        [class*="bg-card"] { break-inside: avoid; box-shadow: none !important; border: 1px solid #ddd !important; }
+      }
+    `
+    document.head.appendChild(style)
+    return () => style.remove()
+  }, [])
+
+  const currencySymbol = (code: string) =>
+    ({ NGN: "₦", USD: "$", KES: "KSh", GHS: "GH₵", ZAR: "R", TZS: "TSh" })[code] || `$${code}`
+
+  const fmt = (n: number, cur = "USD") => `${currencySymbol(cur)}${n?.toLocaleString() ?? "--"}`
 
   async function loadData() {
     try {
       setLoading(true)
-      const payload = getPayload()
-      const estimateData = await apiEstimateCost(payload)
-      setEstimate(estimateData)
-      const projectionData = await apiTcoProjection({
-        ...payload,
-        projection_years: 5,
+      const data = await apiEstimateForm({
+        houseType,
+        country,
+        city,
+        size: Number(size),
+        rooms: Number(rooms),
+        ecoLevel,
+        powerPreference,
+        budget: budget ? Number(budget) : 0,
       })
-      setProjection(projectionData)
-      const materialData = await apiGetMaterials(country, city, "wall")
-      setMaterials(materialData)
+      setResult(data)
     } catch (err) {
       console.log(err)
     } finally {
@@ -173,8 +221,8 @@ const Estimate = () => {
                 <div className="relative mt-2">
                   <Building2 size={16} className="absolute left-4 top-4 text-on-surface-variant z-10" />
                   <select
-                    value={buildingType}
-                    onChange={(e) => setBuildingType(e.target.value)}
+                    value={houseType}
+                    onChange={(e) => setHouseType(e.target.value)}
                     className="w-full pl-11 h-12 rounded-xl border bg-surface-container px-4 text-sm appearance-none"
                   >
                     {buildingTypes.map((b) => (
@@ -198,8 +246,8 @@ const Estimate = () => {
                   <Ruler size={16} className="absolute left-4 top-4 text-on-surface-variant" />
                   <input
                     type="number"
-                    value={sizeSqm}
-                    onChange={(e) => setSizeSqm(e.target.value)}
+                    value={size}
+                    onChange={(e) => setSize(e.target.value)}
                     className="w-full pl-11 h-12 rounded-xl border bg-surface-container px-4 text-sm"
                   />
                 </div>
@@ -237,8 +285,8 @@ const Estimate = () => {
                 <div className="relative mt-2">
                   <Zap size={16} className="absolute left-4 top-4 text-on-surface-variant z-10" />
                   <select
-                    value={power}
-                    onChange={(e) => setPower(e.target.value)}
+                    value={powerPreference}
+                    onChange={(e) => setPowerPreference(e.target.value)}
                     className="w-full pl-11 h-12 rounded-xl border bg-surface-container px-4 text-sm appearance-none"
                   >
                     {powerOptions.map((p) => (
@@ -258,42 +306,133 @@ const Estimate = () => {
             </button>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-5">
-            <CostCard
-              title="Construction Cost"
-              amount={`$ ${estimate?.total_cost || "--"}`}
-              subtitle="Materials + Labour"
-              icon={Wallet}
-              color="#061b0e"
-            />
-            <CostCard
-              title="5-Year Savings"
-              amount={`$ ${projection?.total_savings || "--"}`}
-              subtitle={`Payback ${projection?.payback_months || "--"} months`}
-              icon={TrendingUp}
-              color="#94492c"
-            />
-          </div>
+          {result && (
+            <>
+              <div className="grid sm:grid-cols-2 gap-5">
+                <StatCard
+                  title="Total Construction Cost"
+                  amount={fmt(result.totalCost, result.currency)}
+                  icon={Wallet}
+                  color="#061b0e"
+                  subtitle={result.currency}
+                />
+                <StatCard
+                  title="5-Year Total Savings"
+                  amount={fmt(result.fiveYearSavings?.totalSavings, result.currency)}
+                  icon={PiggyBank}
+                  color="#94492c"
+                  subtitle="Energy + Water + Maintenance"
+                />
+              </div>
 
-          <div className="bg-card rounded-[24px] shadow-soft p-6">
-            <h2 className="font-semibold mb-4">Market Material Rates</h2>
-            <div className="space-y-4">
-              {materials.map((m: any) => (
-                <div
-                  key={m.id}
-                  className="flex justify-between bg-surface-container rounded-xl p-4"
-                >
+              <div className="bg-card rounded-[24px] shadow-soft p-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div
+                    className="w-10 h-10 rounded-full flex items-center justify-center"
+                    style={{ background: "#1a5c3a20" }}
+                  >
+                    <BarChart3 color="#1a5c3a" size={18} />
+                  </div>
+                  <h3 className="font-semibold">Cost Breakdown</h3>
+                </div>
+                <div className="space-y-4">
+                  <BreakdownBar
+                    label="Materials"
+                    value={result.breakdown?.materials ?? 0}
+                    max={result.totalCost}
+                    color="#1a5c3a"
+                    currency={currencySymbol(result.currency)}
+                  />
+                  <BreakdownBar
+                    label="Labour"
+                    value={result.breakdown?.labor ?? 0}
+                    max={result.totalCost}
+                    color="#2d6b5e"
+                    currency={currencySymbol(result.currency)}
+                  />
+                  <BreakdownBar
+                    label="Eco Features"
+                    value={result.breakdown?.ecoFeatures ?? 0}
+                    max={result.totalCost}
+                    color="#8a9a5b"
+                    currency={currencySymbol(result.currency)}
+                  />
+                </div>
+              </div>
+
+              <div className="bg-card rounded-[24px] shadow-soft p-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div
+                    className="w-10 h-10 rounded-full flex items-center justify-center"
+                    style={{ background: "#94492c20" }}
+                  >
+                    <TrendingUp color="#94492c" size={18} />
+                  </div>
+                  <h3 className="font-semibold">5-Year Savings Breakdown</h3>
+                </div>
+                <div className="grid sm:grid-cols-3 gap-4">
+                  {[
+                    { label: "Energy", value: result.fiveYearSavings?.energySavings, color: "#e8a838" },
+                    { label: "Water", value: result.fiveYearSavings?.waterSavings, color: "#3b82c4" },
+                    { label: "Maintenance", value: result.fiveYearSavings?.maintenanceSavings, color: "#8a9a5b" },
+                  ].map((s) => (
+                    <div key={s.label} className="bg-surface-container rounded-xl p-4 text-center">
+                      <div className="text-xs text-on-surface-variant mb-1">{s.label}</div>
+                      <div className="text-lg font-bold" style={{ color: s.color }}>
+                        {fmt(s.value ?? 0, result.currency)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-5">
+                <div className="bg-card rounded-[24px] shadow-soft p-6 flex items-center gap-4">
+                  <div
+                    className="w-14 h-14 rounded-full flex items-center justify-center shrink-0"
+                    style={{ background: "#2d6b5e20" }}
+                  >
+                    <Target color="#2d6b5e" size={24} />
+                  </div>
                   <div>
-                    <div className="font-medium">{m.name}</div>
-                    <div className="text-xs text-on-surface-variant">
-                      Carbon: {m.carbon_score}
+                    <div className="text-sm text-on-surface-variant">Estimated ROI</div>
+                    <div className="text-[28px] font-bold" style={{ color: "#2d6b5e" }}>
+                      {result.roiEstimate || "--"}
                     </div>
                   </div>
-                  <div>$ {m.price_per_unit}</div>
                 </div>
-              ))}
-            </div>
-          </div>
+                <div className="bg-card rounded-[24px] shadow-soft p-6 flex items-center gap-4">
+                  <div
+                    className="w-14 h-14 rounded-full flex items-center justify-center shrink-0"
+                    style={{ background: "#8a9a5b20" }}
+                  >
+                    <BarChart3 color="#8a9a5b" size={24} />
+                  </div>
+                  <div>
+                    <div className="text-sm text-on-surface-variant">Recommendation Score</div>
+                    <div className="text-[28px] font-bold" style={{ color: "#8a9a5b" }}>
+                      {result.recommendationScore ?? "--"}
+                      <span className="text-base font-normal text-on-surface-variant">/10</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <UpgradeCard
+                title="Suggested Upgrades"
+                icon={Lightbulb}
+                color="#4a7c59"
+                items={result.suggestedUpgrades}
+              />
+
+              <UpgradeCard
+                title="Key Assumptions"
+                icon={Leaf}
+                color="#6b4e3a"
+                items={result.keyAssumptions}
+              />
+            </>
+          )}
         </div>
 
         <div>
@@ -303,11 +442,27 @@ const Estimate = () => {
               Generate PDF summary for banks or housing programmes.
             </p>
             <button
-              onClick={() => apiDownloadReport("")}
+              onClick={() => window.print()}
               className="mt-6 w-full h-12 bg-secondary rounded-xl flex items-center justify-center gap-2"
             >
               <Download size={18} />
-              Print / Share
+              Print Report
+            </button>
+            <button
+              onClick={async () => {
+                try {
+                  await apiSaveEstimate({
+                    form: { country, city, houseType, rooms, size, ecoLevel, powerPreference, budget },
+                    result,
+                  })
+                  toast.success("Saved to profile")
+                } catch {
+                  toast.error("Failed to save")
+                }
+              }}
+              className="mt-3 w-full h-12 bg-white/10 rounded-xl flex items-center justify-center gap-2 hover:bg-white/20 transition-colors"
+            >
+              Save to Profile
             </button>
           </div>
         </div>

@@ -39,11 +39,32 @@ return response.json()
 
 export const apiEstimateCost=(payload:any)=>
 request(
-"/api/v1/cost/estimate",
-{
-method:"POST",
-body:JSON.stringify(payload)
-}
+  "/api/v1/cost/estimate",
+  {
+    method:"POST",
+    body:JSON.stringify(payload)
+  }
+)
+
+export const apiEstimateForm=(payload:{
+  houseType: string
+  country: string
+  city: string
+  size: number
+  rooms: number
+  ecoLevel: string
+  powerPreference: string
+  budget: number
+  materials?: Record<string,string>
+  features?: string[]
+  budgetRange?: number[]
+})=>
+request(
+  "/api/v1/cost/estimate-form/",
+  {
+    method:"POST",
+    body:JSON.stringify(payload)
+  }
 )
 
 export const apiTcoProjection=(payload:any)=>
@@ -84,6 +105,12 @@ request(
 // )
 
 // }
+
+export const apiSaveEstimate = (payload: { form: any; result: any }) =>
+  request("/api/v1/profile/saved-estimates", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
 
 export const apiDownloadReport = (layoutId: string) => {
   window.open(
