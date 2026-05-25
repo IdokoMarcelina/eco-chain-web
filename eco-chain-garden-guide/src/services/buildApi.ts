@@ -12,46 +12,21 @@ async function request(path: string, options: RequestInit = {}) {
     },
   });
   if (!response.ok) {
-    throw new Error("Something went wrong");
+    const body = await response.text().catch(() => "");
+    throw new Error(`API error ${response.status}: ${body}`);
   }
   return response.json();
 }
 
-export const apiGetBuildSuggestions = (payload: {
-  country: string;
-  city: string;
-  building_type: string;
-  rooms: number;
-  size_sqm: number;
-  eco_level: string;
-  budget?: number;
-  power?: string;
+export const apiGenerateLayout = (payload: {
+  bedrooms: number;
+  climate_zone: string;
+  style: string;
+  orientation: string;
+  lot_size_sqm: number;
+  budget_usd: number;
 }) =>
-  request("/api/v1/build/suggestions", {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
-
-export const apiGetMaterialAlternatives = (payload: {
-  material: string;
-  eco_preference?: string;
-}) =>
-  request("/api/v1/build/alternatives", {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
-
-export const apiGetBuildPlan = (payload: {
-  country: string;
-  city: string;
-  building_type: string;
-  rooms: number;
-  size_sqm: number;
-  eco_level: string;
-  budget?: number;
-  power?: string;
-}) =>
-  request("/api/v1/build/plan", {
+  request("/api/v1/layout/generate", {
     method: "POST",
     body: JSON.stringify(payload),
   });
