@@ -21,20 +21,10 @@ const ProfilePage = () => {
     navigate("/login");
   };
 
-  // Pull extra fields from localStorage (stored during login)
-  const stored = (() => {
-    try {
-      const raw = localStorage.getItem("eco_user");
-      return raw ? JSON.parse(raw) : {};
-    } catch {
-      return {};
-    }
-  })();
-
-  const location = stored.location ?? "—";
-  const status   = stored.status   ?? "ACTIVE";
-  const joined   = stored.created_at
-    ? new Date(stored.created_at).toLocaleDateString("en-US", {
+  const location = user?.location ?? "—";
+  const status   = user?.status   ?? "ACTIVE";
+  const joined   = user?.created_at
+    ? new Date(user.created_at).toLocaleDateString("en-US", {
         year: "numeric", month: "long", day: "numeric",
       })
     : "—";

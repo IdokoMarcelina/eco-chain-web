@@ -164,8 +164,8 @@ export function useLogin() {
       saveToken(data.access);
       saveRefreshToken(data.refresh);
 
-      // Update AuthContext with the real user name from the backend
-      login(data.user.name, data.user.email);
+      // Update AuthContext with the real user object from the backend
+      login(data.user);
 
       setSuccess(true);
       navigate("/dashboard");

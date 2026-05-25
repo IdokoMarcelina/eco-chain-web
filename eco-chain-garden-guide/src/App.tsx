@@ -13,6 +13,8 @@ import GreenMatch from "./pages/GreenMatch";
 import ProfilePage from "./pages/Profile";
 import SettingsPage from "./pages/Settings";
 import NotFound from "./pages/NotFound.tsx";
+import Estimate from "./pages/Estimate.tsx";
+import BuildAssistant from "./pages/BuildAssistant";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +35,8 @@ const App = () => (
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="*" element={<NotFound />} />
+            <Route path="/estimate" element={<Estimate/>} />
+            <Route path="/build-assistant" element={<BuildAssistant />} />
           </Routes>
         </BrowserRouter>
       </AuthProvider>

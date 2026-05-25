@@ -1,12 +1,21 @@
 import { useState } from "react";
 import {
   SlidersHorizontal, MapPin, Sun, Cloud, Search, LayoutGrid, SlidersHorizontal as FilterIcon,
-  Droplets, ChevronDown, Leaf, Flower2, Sparkles,
+  Droplets, ChevronDown, Leaf, Flower2, Sparkles, Plus,
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { type PlantMatch } from "@/data/mockData";
 import { useGreenMatch } from "@/hooks/useGreenMatch";
+import { useUserPlants } from "@/hooks/useUserPlants";
+import { usePlantDetails } from "@/hooks/usePlantDetails";
 import { Plant, SunExposure, SoilCondition, WaterConservation } from "@/services/greenMatchApi";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 type SunMode = "full" | "partial";
 
@@ -15,11 +24,10 @@ const Toggle = ({
 }: { active: boolean; onClick: () => void; icon: any; label: string }) => (
   <button
     onClick={onClick}
-    className={`flex-1 h-11 rounded-lg flex items-center justify-center gap-2 text-label-md transition-colors border ${
-      active
+    className={`flex-1 h-11 rounded-lg flex items-center justify-center gap-2 text-label-md transition-colors border ${active
         ? "bg-primary-container text-white border-primary-container"
         : "bg-surface-container text-on-surface border-outline-variant hover:border-primary/40"
-    }`}
+      }`}
   >
     <Icon size={16} />
     {label}
@@ -39,7 +47,7 @@ const BadgeChip = ({ tone, label }: { tone: PlantMatch["badge"]["tone"]; label: 
   );
 };
 
-const PlantCard = ({ plant, loading }: { plant: PlantMatch; loading: boolean }) => {
+const PlantCard = ({ plant, loading, onAdd, onView, isAdding }: { plant: PlantMatch; loading: boolean; onAdd?: () => void; onView?: () => void; isAdding?: boolean }) => {
   if (loading) {
     return (
       <div className="bg-card rounded-card shadow-soft overflow-hidden animate-pulse">
@@ -56,16 +64,21 @@ const PlantCard = ({ plant, loading }: { plant: PlantMatch; loading: boolean }) 
     );
   }
   return (
-    <div className="bg-card rounded-card shadow-soft overflow-hidden hover:shadow-card hover:scale-[1.01] transition-all">
-      <div className="relative h-[200px]">
+    <div className="bg-card rounded-card shadow-soft overflow-hidden hover:shadow-card hover:scale-[1.01] transition-all flex flex-col">
+      <div className="relative h-[200px] group cursor-pointer" onClick={onView}>
         <img src={plant.image} alt={plant.name} className="w-full h-full object-cover" loading="lazy" />
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+          <button className="bg-white/90 text-primary px-4 py-2 rounded-full text-label-md opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-2 group-hover:translate-y-0">
+            View Details
+          </button>
+        </div>
         <div className="absolute top-3 left-3">
           <BadgeChip tone={plant.badge.tone} label={plant.badge.label} />
         </div>
       </div>
-      <div className="p-5">
+      <div className="p-5 flex-1 flex flex-col">
         <div className="flex items-start justify-between gap-3 mb-3">
-          <div>
+          <div className="cursor-pointer" onClick={onView}>
             <h3 className="text-headline-md text-primary leading-tight">{plant.name}</h3>
             <p className="text-caption text-on-surface-variant italic mt-0.5">{plant.scientific}</p>
           </div>
@@ -81,7 +94,7 @@ const PlantCard = ({ plant, loading }: { plant: PlantMatch; loading: boolean }) 
             </span>
           ))}
         </div>
-        <div className="space-y-2">
+        <div className="space-y-2 mb-5">
           <div className="flex items-center gap-2 text-body-md text-on-surface">
             <Droplets size={14} className="text-secondary shrink-0" /> {plant.care.water}
           </div>
@@ -89,6 +102,18 @@ const PlantCard = ({ plant, loading }: { plant: PlantMatch; loading: boolean }) 
             <Sun size={14} className="text-secondary shrink-0" /> {plant.care.sun}
           </div>
         </div>
+
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            onAdd?.();
+          }}
+          disabled={isAdding}
+          className="mt-auto w-full h-10 rounded-lg border border-primary text-primary text-label-md flex items-center justify-center gap-2 hover:bg-primary hover:text-white transition-all disabled:opacity-50"
+        >
+          <Plus size={16} />
+          {isAdding ? "Adding..." : "Add to Garden"}
+        </button>
       </div>
     </div>
   );
@@ -131,8 +156,8 @@ function toPlantMatch(p: Plant): PlantMatch {
     tags: Array.isArray(p.tags)
       ? (p.tags as string[]).map((t) => t.trim().toUpperCase())
       : typeof p.tags === "string" && p.tags
-      ? p.tags.split(",").map((t) => t.trim().toUpperCase())
-      : [],
+        ? p.tags.split(",").map((t) => t.trim().toUpperCase())
+        : [],
     care: {
       water: p.water_frequency || p.water_conservation,
       sun: p.sun_exposure,
@@ -165,6 +190,7 @@ function mapWater(value: number): WaterConservation {
 const GreenMatch = () => {
   // ── Hook ─────────────────────────────────────────────────────────────────
   const { results, isLoading, error, runMatch } = useGreenMatch();
+  const { addPlant, isAdding } = useUserPlants();
 
   // ── Local form state ──────────────────────────────────────────────────────
   const [location, setLocation] = useState("");
@@ -324,7 +350,13 @@ const GreenMatch = () => {
 
             {/* Real results from the backend */}
             {!isLoading && displayPlants.map((p) => (
-              <PlantCard key={p.id} plant={p} loading={false} />
+              <PlantCard
+                key={p.id}
+                plant={p}
+                loading={false}
+                isAdding={isAdding}
+                onAdd={() => addPlant({ plant_id: p.id, nickname: p.name })}
+              />
             ))}
 
             {/* Pending card — shown when there are results or before first search */}

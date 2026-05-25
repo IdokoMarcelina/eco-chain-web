@@ -13,7 +13,7 @@ const BASE_URL = "https://ecochainbackend-production.up.railway.app";
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 /** Exact values the backend accepts for sun exposure */
-export type SunExposure = "full_sun" | "partial_shade" | "shade";
+export type SunExposure = "full_sun" | "partial_shade";
 
 /** Exact values the backend accepts for soil condition */
 export type SoilCondition = "loamy" | "sandy" | "clay";

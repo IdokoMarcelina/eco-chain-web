@@ -4,6 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { myPlants, careTasks } from "@/data/mockData";
 import { Link } from "react-router-dom";
 import { useDashboard } from "@/hooks/useDashboard";
+import { useUserPlants } from "@/hooks/useUserPlants";
 
 const StatCard = ({
   icon: Icon, label, value, iconBg, iconColor,
@@ -41,13 +42,14 @@ const Dashboard = () => {
   // ── Real backend data ──────────────────────────────────────────────────────
   // dashboardData contains the raw API response (extend UI when backend fields are confirmed).
   const { dashboardData, isLoading: isDashboardLoading, error: dashboardError } = useDashboard();
+  const { userPlants, isLoading: isPlantsLoading } = useUserPlants();
 
   return (
     <AppLayout>
       {/* ── Dashboard loading / error feedback ── */}
-      {isDashboardLoading && (
+      {(isDashboardLoading || isPlantsLoading) && (
         <div className="mb-4 px-4 py-2 rounded-lg bg-surface-container text-on-surface-variant text-sm">
-          Loading your dashboard data…
+          Loading your garden data…
         </div>
       )}
       {dashboardError && (
@@ -72,29 +74,39 @@ const Dashboard = () => {
       <section className="mb-10">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-headline-md text-on-surface">My Plants</h2>
-          <button className="inline-flex items-center gap-2 px-4 h-10 border border-primary text-primary rounded-lg text-label-md hover:bg-primary hover:text-white transition-colors">
+          <Link to="/green-match" className="inline-flex items-center gap-2 px-4 h-10 border border-primary text-primary rounded-lg text-label-md hover:bg-primary hover:text-white transition-colors">
             <Plus size={16} /> Add Plant
-          </button>
+          </Link>
         </div>
-        <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2 -mx-1 px-1">
-          {myPlants.map((p) => (
-            <div key={p.id} className="w-[240px] shrink-0 bg-card rounded-card shadow-soft overflow-hidden hover:shadow-card transition-all hover:scale-[1.01]">
-              <img src={p.image} alt={p.name} className="w-full h-[160px] object-cover" loading="lazy" />
-              <div className="p-4">
-                <div className="text-body-md font-semibold text-on-surface">{p.name}</div>
-                <div className="text-caption text-on-surface-variant italic">{p.scientific}</div>
-                <div className="flex items-center gap-2 mt-3 flex-wrap">
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container text-caption text-on-surface-variant">
-                    <Droplets size={12} className="text-secondary" /> {p.lastWatered}
-                  </span>
-                  <span className="px-2.5 py-1 rounded-full text-caption" style={{ background: "hsl(75 24% 49% / 0.15)", color: "hsl(75 24% 35%)" }}>
-                    {p.tag}
-                  </span>
+
+        {userPlants.length === 0 && !isPlantsLoading ? (
+          <div className="bg-surface-container rounded-card p-8 text-center">
+            <Leaf className="mx-auto text-primary mb-3" size={32} />
+            <div className="text-body-md text-on-surface font-semibold">Your garden is empty</div>
+            <p className="text-caption text-on-surface-variant mt-1 mb-5">Start by finding native plants that match your environment.</p>
+            <Link to="/green-match" className="text-primary text-label-md font-bold hover:underline">Find Plants</Link>
+          </div>
+        ) : (
+          <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2 -mx-1 px-1">
+            {userPlants.map((up) => (
+              <div key={up.id} className="w-[240px] shrink-0 bg-card rounded-card shadow-soft overflow-hidden hover:shadow-card transition-all hover:scale-[1.01]">
+                <img src={up.plant?.image_url || "/placeholder-plant.jpg"} alt={up.nickname} className="w-full h-[160px] object-cover" loading="lazy" />
+                <div className="p-4">
+                  <div className="text-body-md font-semibold text-on-surface">{up.nickname}</div>
+                  <div className="text-caption text-on-surface-variant italic">{up.plant?.scientific_name || "Unknown species"}</div>
+                  <div className="flex items-center gap-2 mt-3 flex-wrap">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container text-caption text-on-surface-variant">
+                      <Droplets size={12} className="text-secondary" /> {up.plant?.water_frequency || "Moderate"}
+                    </span>
+                    <span className="px-2.5 py-1 rounded-full text-caption" style={{ background: "hsl(75 24% 49% / 0.15)", color: "hsl(75 24% 35%)" }}>
+                      {up.plant?.impact_label || "Native"}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Tasks */}

@@ -1,14 +1,21 @@
 import { createContext, useContext, useState, ReactNode } from "react";
 import { removeToken } from "@/services/api";
 
-type User = { name: string; email: string };
+type User = {
+  id: string;
+  name: string;
+  email: string;
+  location?: string;
+  status?: string;
+  created_at?: string;
+};
 
 type AuthCtx = {
   user: User | null;
   /** Called by useLogin after a successful backend login. */
-  login: (name: string, email: string) => void;
+  login: (userData: User) => void;
   /** Called by useSignup (optimistic local state only – real auth is via OTP). */
-  signup: (name: string, email: string) => void;
+  signup: (userData: User) => void;
   logout: () => void;
 };
 
@@ -26,15 +33,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   });
 
-  const login = (name: string, email: string) => {
-    const u = { name: name || email.split("@")[0] || "Friend", email };
-    setUser(u);
-    localStorage.setItem("eco_user", JSON.stringify(u));
+  const login = (userData: User) => {
+    setUser(userData);
+    localStorage.setItem("eco_user", JSON.stringify(userData));
   };
 
-  const signup = (name: string, email: string) => {
+  const signup = (userData: User) => {
     // Optimistic local update – actual auth is confirmed after OTP verification.
-    setUser({ name: name || "Friend", email });
+    setUser(userData);
   };
 
   const logout = () => {
