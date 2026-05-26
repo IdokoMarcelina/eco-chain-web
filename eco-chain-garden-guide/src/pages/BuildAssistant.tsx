@@ -705,22 +705,6 @@ const BuildAssistant = () => {
                   <Download size={16} />
                   Print Report
                 </button>
-                <button
-                  onClick={async () => {
-                    try {
-                      await apiSaveEstimate({
-                        form: { bedrooms, climateZone, style, orientation, lotSizeSqm, budgetUsd },
-                        result,
-                      })
-                      toast.success("Saved to profile")
-                    } catch {
-                      toast.error("Failed to save")
-                    }
-                  }}
-                  className="mt-3 w-full h-11 bg-white/10 rounded-xl flex items-center justify-center gap-2 text-sm font-medium hover:bg-white/20 transition-colors"
-                >
-                  Save to Profile
-                </button>
               </div>
             )}
           </div>
