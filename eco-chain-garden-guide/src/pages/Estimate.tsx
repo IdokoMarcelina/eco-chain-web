@@ -233,12 +233,18 @@ const Estimate = () => {
               </div>
               <div>
                 <label className="text-sm font-medium">Rooms</label>
-                <input
-                  type="number"
-                  value={rooms}
-                  onChange={(e) => setRooms(e.target.value)}
-                  className="w-full h-12 mt-2 rounded-xl border bg-surface-container px-4 text-sm"
-                />
+                <div className="relative mt-2">
+                  <Building2 size={16} className="absolute left-4 top-4 text-on-surface-variant z-10" />
+                  <select
+                    value={rooms}
+                    onChange={(e) => setRooms(e.target.value)}
+                    className="w-full pl-11 h-12 rounded-xl border bg-surface-container px-4 text-sm appearance-none"
+                  >
+                    {[1,2,3,4,5,6].map((n) => (
+                      <option key={n} value={n}>{n}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
               <div>
                 <label className="text-sm font-medium">Size (sq m)</label>

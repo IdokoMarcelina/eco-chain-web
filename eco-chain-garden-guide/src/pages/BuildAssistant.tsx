@@ -458,12 +458,15 @@ const BuildAssistant = () => {
                 <label className="text-sm font-medium">Bedrooms</label>
                 <div className="relative mt-2">
                   <BedDouble size={16} className="absolute left-4 top-4 text-on-surface-variant" />
-                  <input
-                    type="number"
+                  <select
                     value={bedrooms}
                     onChange={(e) => setBedrooms(e.target.value)}
-                    className="w-full pl-11 h-12 rounded-xl border bg-surface-container px-4 text-sm"
-                  />
+                    className="w-full pl-11 h-12 rounded-xl border bg-surface-container px-4 text-sm appearance-none"
+                  >
+                    {[1,2,3,4,5,6].map((n) => (
+                      <option key={n} value={n}>{n}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
               <div>
